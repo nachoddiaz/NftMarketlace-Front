@@ -30,3 +30,70 @@ Moralis.Cloud.afterSave("ItemListed", async (request) => {
         await activeItem.save()
     }
 })
+
+Moralis.Cloud.afterSave("ItemBought", async (request) => {
+    //Every event gets triggered twice, once on unconformed and other with confirmed
+    const confirmed = request.object.get("confirmed")
+    const logger = Moralis.Cloud.getLogger()
+    logger.info(`Marketplace | Object ${request.object}`)
+    if (confirmed) {
+        logger.info("Found Item")
+        //If ActiveItem exists, grab it, if not, create it
+        const ActiveItem = Moralis.Object.extend("ActiveItem")
+        const query = new Moralis.Query(ActiveItem)
+
+        query.equalTo("marketplaceAddress", request.object.get("address"))
+        query.equalTo("nftAddress", request.object.get("nftAddress"))
+        query.equalTo("tokenId", request.object.get("tokenId"))
+
+        logger.info(`Marketplace | Query ${query}`)
+        const boughtItem = await query.first()
+        if (boughtItem) {
+            logger.info(`Deleting ${request.object.get("objectId")}`)
+            await boughtItem.destroy()
+            logger.info(`Deleting item with TokenId: ${request.object.get("tokenId")}
+            at address ${request.object.get(address)}`)
+        } else {
+            logger.info(
+                `No item found with address :${request.object.get(
+                    "nftAddress"
+                )} and tokenId : ${request.object.get("tokenId")}`
+            )
+        }
+    }
+})
+
+Moralis.Cloud.afterSave("ItemCanceled", async (request) => {
+    //Every event gets triggered twice, once on unconformed and other with confirmed
+    const confirmed = request.object.get("confirmed")
+    const logger = Moralis.Cloud.getLogger()
+    logger.info(`Marketplace | Object ${request.object}`)
+    if (confirmed) {
+        logger.info("Found Item")
+        //If ActiveItem exists, grab it, if not, create it
+        const ActiveItem = Moralis.Object.extend("ActiveItem")
+        const query = new Moralis.Query(ActiveItem)
+
+        query.equalTo("marketplaceAddress", request.object.get("address"))
+        query.equalTo("nftAddress", request.object.get("nftAddress"))
+        query.equalTo("tokenId", request.object.get("tokenId"))
+
+        logger.info(`Marketplace | Query ${query}`)
+        //Fincd the Nft with the same address and tokenId and cancel it
+        const canceledItem = await query.first()
+        logger.info(`Marketplace | CanceledItem ${canceledItem}`)
+        if (canceledItem) {
+            logger.info(
+                `Deleting: ${request.object.get("tokenId")}. 
+                at address :${request.object.get("nftAddress")} cause it was canceled`
+            )
+            await canceledItem.destroy()
+        } else {
+            logger.info(
+                `No item found with address :${request.object.get(
+                    "nftAddress"
+                )} and tokenId : ${request.object.get("tokenId")}`
+            )
+        }
+    }
+})
