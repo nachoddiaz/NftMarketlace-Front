@@ -15,8 +15,33 @@ export default function Home() {
 
     const { data: listedNfts, isFetching: fetchingListedNfts } = useMoralisQuery(
         //TableName and a function needed
-        "ActiveItem"
+        "ActiveItem",
+        //Grap the first 10 in descending order of the tokenId
+        (query) => query.limit(10).descending("tokenId")
     )
+    console.log(listedNfts)
 
-    return <div className={styles.container}>Home Page</div>
+    return (
+        <div className={styles.container}>
+            {fetchingListedNfts ? (
+                <div>Loading... </div>
+            ) : (
+                listedNfts.map((nft) => {
+                    console.log(nft.attributes)
+                    const { price, nftAddress, tokenId, marketplaceAddress, seller } =
+                        nft.attributes
+                    return (
+                        <NFTBox
+                            price={price}
+                            nftAddress={nftAddress}
+                            tokenId={tokenId}
+                            marketplaceAddress={marketplaceAddress}
+                            seller={seller}
+                            key={`${nftAddress}${tokenId}`}
+                        />
+                    )
+                })
+            )}
+        </div>
+    )
 }
