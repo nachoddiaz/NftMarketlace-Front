@@ -3,6 +3,7 @@ import Image from "next/image"
 import styles from "../styles/Home.module.css"
 import Header from "../components/Header"
 import { useMoralisQuery } from "react-moralis"
+import NFTBox from "../components/NFTBox"
 
 export default function Home() {
     /*
