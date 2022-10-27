@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import { useWeb3Contract, useMoralis } from "react-moralis"
 import nftMarketplaceAbi from "constants/abi.jsonNftMarketplace"
 import nftAbi from "constants/abi.jsonBasicNFT"
+import { Image } from "next/image"
 
 //To show correctly the NFT in the front
-export default function NFTBox({price, nftAddress, tokenId, marketplaceAddress, seller}) {
-    const {isWeb3Enabled} = useMoralis()
+export default function NFTBox({ price, nftAddress, tokenId, marketplaceAddress, seller }) {
+    const { isWeb3Enabled } = useMoralis()
     const [imageURI, setImageURI] = useState("")
     const { runContractFunction: getTokenURI } = useWeb3Contract({
         abi: nftAbi,
@@ -21,8 +22,13 @@ export default function NFTBox({price, nftAddress, tokenId, marketplaceAddress, 
         const tokenURI = await getTokenURI()
         console.log(tokenId)
         //Get the image of that token. Need to turn IPFS to HTTPS
-        if(tokenURI){
-
+        if (tokenURI) {
+            const requestURL = tokenURI.replace("ipfs://", "https://ipfs.io/ipfs/")
+            //1.await to get the response 2.wait to get it json
+            const tokenURIResponse = await (await fetch(requestURL)).json()
+            const imageURI = tokenURIResponse.image //replace("ipfd://", "https://ipfs.io/ipfs/")
+            const imageURIURL = imageURI.replace("ipfs://", "https://ipfs.io/ipfs/")
+            setImageURI(imageURIURL)
         }
     }
 
@@ -32,4 +38,20 @@ export default function NFTBox({price, nftAddress, tokenId, marketplaceAddress, 
             updateUI()
         }
     }, [isWeb3Enabled])
+
+    return (
+        <div>
+            <div>
+                {imageURI ? (
+                    <Image>
+                        loader={() => imageURI}
+                        src={imageURI}
+                        height="200" width="200"
+                    </Image>
+                ) : (
+                    <div>Loading image...</div>
+                )}
+            </div>
+        </div>
+    )
 }
