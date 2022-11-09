@@ -13,7 +13,7 @@ export default function Home() {
      *       Take the event emited by the ListItem function, index it off-chain and read it from that server
      * @dev: Decide to take the second option because is cheaper and more flexible
      */
-    const {isWeb3Enabled} = useMoralis
+    const {isWeb3Enabled,} = useMoralis
     const { data: listedNfts, isFetching: fetchingListedNfts } = useMoralisQuery(
         //TableName and a function needed
         "ActiveItem",
