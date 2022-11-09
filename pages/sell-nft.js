@@ -1,10 +1,12 @@
 import { ethers } from "ethers"
 import Head from "next/head"
 import Image from "next/image"
-import { Form } from "web3uikit"
+import { Form, useNotification } from "web3uikit"
 import styles from "../styles/Home.module.css"
 import nftAbi from "constants/abi.jsonBasicNFT"
 import { useMoralis, useWeb3Contract } from "react-moralis"
+import nftMarketplaceAbi from "constants/abi.jsonNftMarketplace"
+import networkMapping from "../constants/networkMapping.json"
 
 export default function Home() {
     const { chainId } = useMoralis()
@@ -21,7 +23,7 @@ export default function Home() {
 
         const approveOptions = {
             abi: nftAbi,
-            contractAddress: maketplaceAddress,
+            contractAddress: marketplaceAddress,
             functionName: "updateLsting",
             params: {
                 nftAddress: nftAddress,
@@ -39,7 +41,37 @@ export default function Home() {
         })
     }
 
-    async function hadleApproveSuccess(nftAddress, tokenId, price) {}
+    async function hadleApproveSuccess(nftAddress, tokenId, price) {
+        const listOptions = {
+            abi: nftMarketplaceAbi,
+            contractAddress: marketplaceAddress,
+            functionName: "ListItem",
+            params: {
+                nftAddress: nftAddress,
+                tokenId: tokenId,
+                price: price,
+            },
+        }
+
+        await runContractFunction({
+            params: listOptions,
+            onError: (error) => {
+                console.log(error)
+            },
+            onSuccess: () => hadleListSuccess(),
+        })
+    }
+
+    const dispatch = useNotification()
+
+    async function hadleListSuccess() {
+        dispatch({
+            type: "success",
+            message: "NFT Listed",
+            title: "NFT Listed",
+            position: "topR",
+        })
+    }
 
     return (
         <div className={styles.container}>
