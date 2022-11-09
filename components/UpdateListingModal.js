@@ -30,6 +30,8 @@ export default function UpdateListingModal({
         setPriceToUpdateListing()
     }
 
+    
+
     const { runContractFunction: updateLsting } = useWeb3Contract({
         abi: nftAbi,
         contractAddress: maketplaceAddress,
@@ -38,6 +40,18 @@ export default function UpdateListingModal({
             nftAddress: nftAddress,
             tokenId: tokenId,
             newPrice: ethers.utils.parseEther(priceToUpdateListing || "0"),
+        },
+    })
+
+
+    const { runContractFunction: buyItem } = useWeb3Contract({
+        abi: nftAbi,
+        contractAddress: maketplaceAddress,
+        functionName: "buyItem",
+        msgValue: price,
+        params: {
+            nftAddress: nftAddress,
+            tokenId: tokenId,
         },
     })
 
